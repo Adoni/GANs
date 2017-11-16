@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[21]:
 
 
 import torch
@@ -14,7 +14,7 @@ import torch.optim as optim
 import sys
 
 
-# In[2]:
+# In[22]:
 
 
 from matplotlib import pyplot as plt
@@ -29,7 +29,7 @@ def imshow(inp, file_name, save=False, title=None):
         plt.show()
 
 
-# In[4]:
+# In[23]:
 
 
 root = './data'
@@ -50,7 +50,7 @@ test_loader = torch.utils.data.DataLoader(
                 shuffle=False)
 
 
-# In[70]:
+# In[24]:
 
 
 z_size=128
@@ -58,12 +58,12 @@ hidden_size=128
 img_size=28
 
 
-# In[71]:
+# In[28]:
 
 
 class Generator(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(Generator,self).__init__()
         self.model = nn.Sequential(
             nn.Linear(z_size, hidden_size*2),
             nn.LeakyReLU(0.2, inplace=True),
@@ -81,12 +81,12 @@ class Generator(nn.Module):
         return out
 
 
-# In[72]:
+# In[29]:
 
 
 class Discriminator(nn.Module):
     def __init__(self):
-        super().__init__()
+        super(Discriminator,self).__init__()
         self.model = nn.Sequential(
             nn.Linear(img_size**2, hidden_size*4),
             nn.LeakyReLU(0.2, inplace=True),
@@ -105,7 +105,7 @@ class Discriminator(nn.Module):
         return out
 
 
-# In[73]:
+# In[30]:
 
 
 from tqdm import tqdm
@@ -124,10 +124,16 @@ for epoch in tqdm(range(10000)):
     for _ in range(5):
         optimizers['D'].zero_grad()
         data=next(iter(train_loader))[0]
-        data = Variable(data)
+        if torch.cuda.is_available():
+            data = Variable(data.cuda())
+        else:
+            data = Variable(data)
         output_real = D(data)
         noisev = torch.randn(data.size()[0], z_size, 1, 1)
-        noisev = Variable(noisev)
+        if torch.cuda.is_available():
+            noisev = Variable(noisev.cuda())
+        else:
+            noisev = Variable(noisev)
         fake_data = G(noisev)
         output_fake = D(fake_data)
         D_loss = -(torch.mean(output_real) - torch.mean(output_fake))
@@ -139,7 +145,10 @@ for epoch in tqdm(range(10000)):
 
     optimizers['G'].zero_grad()
     noisev = torch.randn(data.size()[0], z_size, 1, 1)
-    noisev = Variable(noisev)
+    if torch.cuda.is_available():
+        noisev = Variable(noisev.cuda())
+    else:
+        noisev = Variable(noisev)
     fake_data = G(noisev)
     output_fake1 = D(fake_data)
     G_loss = -torch.mean(output_fake1)
@@ -148,7 +157,10 @@ for epoch in tqdm(range(10000)):
     optimizers['G'].step()
 
     if epoch % 1000 == 0:
-        dd = utils.make_grid(fake_data.data[:16])
+        if torch.cuda.is_available():
+            dd = utils.make_grid(fake_data.cpu().data[:16])
+        else:
+            dd = utils.make_grid(fake_data.data[:16])
         imshow(dd,'./results/WGAN_%d.png'%(epoch))
 
 
