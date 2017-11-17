@@ -131,7 +131,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[18]:
+# In[19]:
 
 
 from tqdm import tqdm
@@ -160,6 +160,8 @@ for epoch in tqdm(range(10000)):
             p.data.clamp_(-0.01, 0.01)
         optimizers['D'].zero_grad()
         data=next(iter(train_loader))[0]
+        if torch.cuda.is_available():
+            data=data.cuda()
         input_holder.resize_as_(data).copy_(data)
         output_real = D(Variable(data))
         output_real.backward(one)
