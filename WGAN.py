@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[10]:
 
 
 import torch
@@ -14,18 +14,20 @@ import torch.optim as optim
 import sys
 
 
-# In[2]:
+# In[11]:
 
 
 import matplotlib
+import numpy
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from torchvision import utils
-show_image=True
+show_image=False
 def imshow(inp, file_name, save=False, title=None):
     """Imshow for Tensor."""
     fig = plt.figure(figsize=(5, 5))
     inp = inp.numpy().transpose((1, 2, 0))
+    inp-=numpy.min(inp)
     plt.imshow(inp, cmap='gray')
     plt.savefig(file_name)
     if show_image:
@@ -34,7 +36,7 @@ def imshow(inp, file_name, save=False, title=None):
         print("Don't show")
 
 
-# In[17]:
+# In[12]:
 
 
 z_size=128
@@ -42,7 +44,7 @@ hidden_size=512
 img_size=28
 
 
-# In[19]:
+# In[13]:
 
 
 root = './data'
@@ -67,7 +69,7 @@ test_loader = torch.utils.data.DataLoader(
     dataset=test_set, batch_size=batch_size, shuffle=False)
 
 
-# In[20]:
+# In[14]:
 
 
 class Generator(nn.Module):
@@ -87,7 +89,7 @@ class Generator(nn.Module):
         return out
 
 
-# In[21]:
+# In[15]:
 
 
 class Discriminator(nn.Module):
@@ -106,14 +108,14 @@ class Discriminator(nn.Module):
         return torch.mean(out)
 
 
-# In[22]:
+# In[16]:
 
 
 one = torch.FloatTensor([1])
 mone = one * -1
 
 
-# In[ ]:
+# In[18]:
 
 
 from tqdm import tqdm
@@ -131,7 +133,11 @@ criterion = nn.BCELoss()
 for epoch in tqdm(range(10000)):
     for p in D.parameters():
         p.requires_grad = True
-    for _ in range(100):
+    if epoch<200 or epoch%200==0:
+        iter_D=100
+    else:
+        iter_D=5
+    for _ in range(iter_D):
         optimizers['D'].zero_grad()
         data=next(iter(train_loader))[0]
         if torch.cuda.is_available():
@@ -171,7 +177,7 @@ for epoch in tqdm(range(10000)):
 #     G_loss.backward()
     optimizers['G'].step()
 
-    if epoch % 1000 == 0:
+    if epoch % 100 == 0:
         print('show')
         if torch.cuda.is_available():
             dd = utils.make_grid(fake_data.cpu().data[:16])
