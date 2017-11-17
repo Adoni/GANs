@@ -184,7 +184,7 @@ for epoch in tqdm(range(10000)):
 #     G_loss.backward()
     optimizers['G'].step()
 
-    if epoch % 100 == 0:
+    if epoch % 1000 == 0:
         print('show')
         if torch.cuda.is_available():
             dd = utils.make_grid(fake_data.cpu().data[:16])
