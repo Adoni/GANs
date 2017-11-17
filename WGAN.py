@@ -108,10 +108,12 @@ class Discriminator(nn.Module):
         return torch.mean(out)
 
 
-# In[16]:
+# In[19]:
 
 
 one = torch.FloatTensor([1])
+if torch.cuda.is_available():
+    one=one.cuda()
 mone = one * -1
 
 
