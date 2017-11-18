@@ -15,7 +15,7 @@ import torchvision.utils as vutils
 import sys
 
 
-# In[5]:
+# In[52]:
 
 
 import matplotlib
@@ -66,7 +66,7 @@ test_loader = torch.utils.data.DataLoader(
     dataset=test_set, batch_size=batch_size, shuffle=False)
 
 
-# In[30]:
+# In[45]:
 
 
 class Generator(nn.Module):
@@ -74,15 +74,19 @@ class Generator(nn.Module):
         super(Generator,self).__init__()
         self.model = nn.Sequential(
             nn.ConvTranspose2d(z_size,hidden_size*8,4,2,1),
+            nn.BatchNorm2d(hidden_size*8),
             nn.ReLU(True),
             nn.ConvTranspose2d(hidden_size*8,hidden_size*4,4,2,1),
+            nn.BatchNorm2d(hidden_size*4),
             nn.ReLU(True),
             nn.ConvTranspose2d(hidden_size*4,hidden_size*2,4,2,1),
+            nn.BatchNorm2d(hidden_size*2),
             nn.ReLU(True),
             nn.ConvTranspose2d(hidden_size*2,hidden_size,4,2,1),
+            nn.BatchNorm2d(hidden_size*1),
             nn.ReLU(True),
             nn.ConvTranspose2d(hidden_size,1,4,2,1),
-            nn.Sigmoid(),
+            nn.Tanh(),
         )
     def forward(self, x):
         x = x.view(x.size()[0], z_size, 1, 1)
@@ -91,7 +95,7 @@ class Generator(nn.Module):
         return out
 
 
-# In[31]:
+# In[46]:
 
 
 class Discriminator(nn.Module):
@@ -99,13 +103,15 @@ class Discriminator(nn.Module):
         super(Discriminator,self).__init__()
         self.model = nn.Sequential(
             nn.Conv2d(1,hidden_size,4,2,1),
-            nn.ReLU(True),
+            nn.BatchNorm2d(hidden_size),
+            nn.LeakyReLU(0.2, True),
             nn.Conv2d(hidden_size,hidden_size*2,4,2,1),
-            nn.ReLU(True),
+            nn.BatchNorm2d(hidden_size*2),
+            nn.LeakyReLU(0.2, True),
             nn.Conv2d(hidden_size*2,hidden_size*4,4,2,1),
-            nn.ReLU(True),
+            nn.BatchNorm2d(hidden_size*4),
+            nn.LeakyReLU(0.2, True),
             nn.Conv2d(hidden_size*4,hidden_size*8,4,2,1),
-            nn.ReLU(True),           
         )
         self.linear=nn.Sequential(
             nn.Linear(hidden_size*8*2*2,1)
@@ -119,7 +125,7 @@ class Discriminator(nn.Module):
         return out
 
 
-# In[32]:
+# In[47]:
 
 
 one = torch.FloatTensor([1])
@@ -132,7 +138,7 @@ if torch.cuda.is_available():
 mone = one * -1
 
 
-# In[33]:
+# In[48]:
 
 
 def weights_init(m):
@@ -144,7 +150,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[ ]:
+# In[51]:
 
 
 from tqdm import tqdm
@@ -166,9 +172,9 @@ for epoch in tqdm(range(10000)):
     for p in D.parameters():
         p.requires_grad = True
     if epoch<25 or epoch%100==0:
-        iter_D=100
+        iter_D=1
     else:
-        iter_D=5
+        iter_D=1
     for _ in range(iter_D):
         for p in D.parameters():
             p.data.clamp_(-0.01, 0.01)
@@ -208,8 +214,8 @@ for epoch in tqdm(range(10000)):
         imshow(dd,'./results/WGAN_DC_%d.png'%(epoch))
         dd = dd.mul(0.5).add(0.5)
         vutils.save_image(dd, './results/OrWGAN_DC_%d.png'%(epoch))
-        plt.plot(err_Ds)
-        plt.show()
+        #plt.plot(err_Ds)
+        #plt.show()
 
 
 # In[60]:
