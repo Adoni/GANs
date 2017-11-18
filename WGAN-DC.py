@@ -128,7 +128,7 @@ input_holder = torch.FloatTensor(batch_size, 1, img_size, img_size)
 if torch.cuda.is_available():
     one=one.cuda()
     noise_holder=noise_holder.cuda()
-    noise_holder=input_holder.cuda()
+    input_holder=input_holder.cuda()
 mone = one * -1
 
 
@@ -166,7 +166,7 @@ for epoch in tqdm(range(10000)):
     for p in D.parameters():
         p.requires_grad = True
     if epoch<25 or epoch%100==0:
-        iter_D=5
+        iter_D=100
     else:
         iter_D=5
     for _ in range(iter_D):
