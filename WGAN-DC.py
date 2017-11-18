@@ -20,10 +20,10 @@ import sys
 
 import matplotlib
 import numpy
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 from torchvision import utils
-show_image=True
+show_image=False
 def imshow(inp, file_name, save=False, title=None):
     """Imshow for Tensor."""
     fig = plt.figure(figsize=(10, 10))
