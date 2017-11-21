@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[14]:
+# In[1]:
 
 
 import torch
@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 from torchvision import utils
 
 
-# In[15]:
+# In[2]:
 
 
 def imshow(inp, file_name, save=False, title=None):
@@ -42,11 +42,11 @@ def imshow(inp, file_name, save=False, title=None):
         print("Don't show")
 
 
-# In[16]:
+# In[3]:
 
 
 batch_size = 200
-z_size=128
+z_size=2
 hidden_size=512
 img_size=32
 niter=100
@@ -54,7 +54,7 @@ epsilon=1
 use_cuda=torch.cuda.is_available()
 
 
-# In[13]:
+# In[4]:
 
 
 root = './data'
@@ -73,7 +73,7 @@ G_loader = torch.utils.data.DataLoader(
     dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[7]:
+# In[5]:
 
 
 class Generator(nn.Module):
@@ -94,7 +94,7 @@ class Generator(nn.Module):
         return out
 
 
-# In[8]:
+# In[6]:
 
 
 class Discriminator(nn.Module):
@@ -109,7 +109,7 @@ class Discriminator(nn.Module):
         return x
 
 
-# In[9]:
+# In[7]:
 
 
 one = torch.FloatTensor([1])
@@ -122,7 +122,7 @@ if use_cuda:
 mone = one * -1
 
 
-# In[17]:
+# In[8]:
 
 
 def weights_init(m):
@@ -134,7 +134,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[18]:
+# In[9]:
 
 
 def sinkhorn_loss(x, y, epsilon, n, niter):
@@ -210,7 +210,7 @@ def cost_matrix(x, y, p=2):
     return c
 
 
-# In[20]:
+# In[10]:
 
 
 from tqdm import tqdm
