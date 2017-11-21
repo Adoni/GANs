@@ -231,6 +231,8 @@ errs=[]
 for epoch in tqdm(range(10000)):
     optimizers['G'].zero_grad()
     data=next(iter(G_loader))[0]
+    if use_cuda:
+        data=data.cuda()
     input_holder.resize_as_(data).copy_(data)
     y = D(Variable(data))
     noise_holder.resize_(data.size()[0], z_size, 1, 1).normal_(0, 1)
