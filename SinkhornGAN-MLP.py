@@ -250,7 +250,7 @@ for epoch in tqdm(range(10000)):
         errs.append(Loss_G.data[0])
     optimizers['G'].step()
 
-    if epoch % 10 == 0:
+    if epoch % 200 == 0:
         if use_cuda:
             dd = utils.make_grid(fake_data.cpu().data[:64])
         else:
