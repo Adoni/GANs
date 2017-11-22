@@ -48,7 +48,7 @@ z_size=2
 hidden_size=512
 img_size=32
 niter=100
-epsilon=1
+epsilon=0.1
 use_cuda=torch.cuda.is_available()
 
 
@@ -142,7 +142,7 @@ def sinkhorn_loss(x, y, epsilon, n, niter):
 	niter is the max. number of steps in sinkhorn loop
 	"""
     # The Sinkhorn algorithm takes as input three variables :
-    C = cost_matrix(x, y)  # Wasserstein cost function
+    C = cost_matrix(x, y)/n  # Wasserstein cost function
 
     # both marginals are fixed with equal weights
     if use_cuda:
@@ -219,7 +219,7 @@ print(G)
 if use_cuda:
     G.cuda()
     D.cuda()
-G_lr = D_lr = 5e-5
+G_lr = D_lr = 5e-3
 optimizers = {
     'D': torch.optim.RMSprop(D.parameters(), lr=D_lr),
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
