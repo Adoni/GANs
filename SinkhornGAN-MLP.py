@@ -43,13 +43,14 @@ def imshow(inp, file_name, save=False, title=None):
 # In[13]:
 
 
-batch_size = 200
+batch_size = 100
 z_size=2
 hidden_size=512
 img_size=28
 niter=100
 epsilon=0.1
 G_lr = D_lr = 5e-3
+print(G_lr)
 use_cuda=torch.cuda.is_available()
 
 
@@ -141,7 +142,7 @@ def sinkhorn_loss(x, y, epsilon, n, niter):
 	niter is the max. number of steps in sinkhorn loop
 	"""
     # The Sinkhorn algorithm takes as input three variables :
-    C = cost_matrix(x, y)  # Wasserstein cost function
+    C = cost_matrix(x, y)/n  # Wasserstein cost function
 
     # both marginals are fixed with equal weights
     if use_cuda:
