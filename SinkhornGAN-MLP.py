@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[11]:
 
 
 import torch
@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 from torchvision import utils
 
 
-# In[2]:
+# In[12]:
 
 
 def imshow(inp, file_name, save=False, title=None):
@@ -37,22 +37,23 @@ def imshow(inp, file_name, save=False, title=None):
     if show_image:
         plt.show()
     else:
-        print("Don't show")
+        plt.gcf().clear()
 
 
-# In[3]:
+# In[13]:
 
 
 batch_size = 200
 z_size=2
 hidden_size=512
-img_size=32
+img_size=28
 niter=100
 epsilon=0.1
+G_lr = D_lr = 5e-3
 use_cuda=torch.cuda.is_available()
 
 
-# In[4]:
+# In[14]:
 
 
 root = './data'
@@ -71,7 +72,7 @@ G_loader = torch.utils.data.DataLoader(
     dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[5]:
+# In[15]:
 
 
 class Generator(nn.Module):
@@ -80,8 +81,6 @@ class Generator(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(z_size, hidden_size),
             nn.ReLU(True),
-#             nn.Linear(hidden_size, hidden_size),
-#             nn.ReLU(True),
             nn.Linear(hidden_size, img_size**2),
 #             nn.Tanh(),
         )
@@ -92,7 +91,7 @@ class Generator(nn.Module):
         return out
 
 
-# In[6]:
+# In[16]:
 
 
 class Discriminator(nn.Module):
@@ -107,7 +106,7 @@ class Discriminator(nn.Module):
         return x
 
 
-# In[7]:
+# In[17]:
 
 
 one = torch.FloatTensor([1])
@@ -120,7 +119,7 @@ if use_cuda:
 mone = one * -1
 
 
-# In[8]:
+# In[18]:
 
 
 def weights_init(m):
@@ -142,7 +141,7 @@ def sinkhorn_loss(x, y, epsilon, n, niter):
 	niter is the max. number of steps in sinkhorn loop
 	"""
     # The Sinkhorn algorithm takes as input three variables :
-    C = cost_matrix(x, y)/n  # Wasserstein cost function
+    C = cost_matrix(x, y)  # Wasserstein cost function
 
     # both marginals are fixed with equal weights
     if use_cuda:
@@ -219,7 +218,6 @@ print(G)
 if use_cuda:
     G.cuda()
     D.cuda()
-G_lr = D_lr = 5e-3
 optimizers = {
     'D': torch.optim.RMSprop(D.parameters(), lr=D_lr),
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
