@@ -31,8 +31,8 @@ from torchvision import utils
 def imshow(inp, file_name, save=False, title=None):
     """Imshow for Tensor."""
     fig = plt.figure(figsize=(5, 5))
-    inp = inp.numpy().transpose((1, 2, 0))
-    plt.imshow(inp)
+    inp = transforms.ToPILImage()(inp)
+    plt.imshow(inp,cmap='gray')
     plt.savefig(file_name)
     if show_image:
         plt.show()
