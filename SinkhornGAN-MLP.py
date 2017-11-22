@@ -137,15 +137,15 @@ def weights_init(m):
 
 def sinkhorn_loss(x, y, epsilon, n, niter):
     """
-    Given two emprical measures with n points each with locations x and y
-    outputs an approximation of the OT cost with regularization parameter epsilon
-    niter is the max. number of steps in sinkhorn loop
-    """
+	Given two emprical measures with n points each with locations x and y
+	outputs an approximation of the OT cost with regularization parameter epsilon
+	niter is the max. number of steps in sinkhorn loop
+	"""
     # The Sinkhorn algorithm takes as input three variables :
-    C = cost_matrix(x, y)/n  # Wasserstein cost function
+    C = cost_matrix(x, y)  # Wasserstein cost function
 
     # both marginals are fixed with equal weights
-    if cuda:
+    if use_cuda:
         mu = Variable(
             1. / n * torch.cuda.FloatTensor(n).fill_(1), requires_grad=False)
         nu = Variable(
@@ -196,6 +196,7 @@ def sinkhorn_loss(x, y, epsilon, n, niter):
     U, V = u, v
     pi = torch.exp(M(U, V))  # Transport plan pi = diag(a)*K*diag(b)
     cost = torch.sum(pi * C)  # Sinkhorn cost
+
     return cost
 
 
@@ -253,7 +254,7 @@ for epoch in tqdm(range(10000)):
         else:
             dd = utils.make_grid(fake_data.data[:64])
         dd = dd.mul(0.5).add(0.5)
-        vutils.save_image(dd, './results/Vutil_Sinkhorn_MLP_%d.png'%(epoch))
+        vutils.save_image(dd, './results/Vuil_Sinkhorn_MLP_%d.png'%(epoch))
         imshow(dd,'./results/Sinkhorn_MLP_%d.png'%(epoch))
         plt.plot(errs)
         plt.savefig('./results/Sinkhorn_loss.png')
