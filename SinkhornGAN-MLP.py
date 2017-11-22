@@ -32,8 +32,6 @@ def imshow(inp, file_name, save=False, title=None):
     """Imshow for Tensor."""
     fig = plt.figure(figsize=(5, 5))
     inp = inp.numpy().transpose((1, 2, 0))
-    inp[inp>1]=1
-    inp[inp<-1]=-1
     plt.imshow(inp)
     plt.savefig(file_name)
     if show_image:
@@ -82,10 +80,10 @@ class Generator(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(z_size, hidden_size),
             nn.ReLU(True),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(True),
+#             nn.Linear(hidden_size, hidden_size),
+#             nn.ReLU(True),
             nn.Linear(hidden_size, img_size**2),
-            nn.Tanh(),
+#             nn.Tanh(),
         )
     def forward(self, x):
         x = x.view(x.size()[0], z_size)
@@ -256,6 +254,7 @@ for epoch in tqdm(range(10000)):
         else:
             dd = utils.make_grid(fake_data.data[:64])
         dd = dd.mul(0.5).add(0.5)
+        vutils.save_image(dd, './results/Vutil_Sinkhorn_MLP_%d.png'%(epoch))
         imshow(dd,'./results/Sinkhorn_MLP_%d.png'%(epoch))
         plt.plot(errs)
         plt.savefig('./results/Sinkhorn_loss.png')
