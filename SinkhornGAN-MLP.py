@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[11]:
+# In[19]:
 
 
 import torch
@@ -25,7 +25,7 @@ from matplotlib import pyplot as plt
 from torchvision import utils
 
 
-# In[12]:
+# In[20]:
 
 
 def imshow(inp, file_name, save=False, title=None):
@@ -40,7 +40,7 @@ def imshow(inp, file_name, save=False, title=None):
         plt.gcf().clear()
 
 
-# In[13]:
+# In[21]:
 
 
 batch_size = 100
@@ -50,11 +50,10 @@ img_size=28
 niter=100
 epsilon=0.1
 G_lr = D_lr = 5e-3
-print(G_lr)
 use_cuda=torch.cuda.is_available()
 
 
-# In[14]:
+# In[22]:
 
 
 root = './data'
@@ -73,7 +72,7 @@ G_loader = torch.utils.data.DataLoader(
     dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[15]:
+# In[23]:
 
 
 class Generator(nn.Module):
@@ -92,7 +91,7 @@ class Generator(nn.Module):
         return out
 
 
-# In[16]:
+# In[24]:
 
 
 class Discriminator(nn.Module):
@@ -107,7 +106,7 @@ class Discriminator(nn.Module):
         return x
 
 
-# In[17]:
+# In[25]:
 
 
 one = torch.FloatTensor([1])
@@ -120,7 +119,7 @@ if use_cuda:
 mone = one * -1
 
 
-# In[18]:
+# In[26]:
 
 
 def weights_init(m):
@@ -132,7 +131,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[9]:
+# In[31]:
 
 
 def sinkhorn_loss(x, y, epsilon, n, niter):
@@ -208,7 +207,7 @@ def cost_matrix(x, y, p=2):
     return c
 
 
-# In[10]:
+# In[32]:
 
 
 from tqdm import tqdm
@@ -247,7 +246,7 @@ for epoch in tqdm(range(10000)):
         errs.append(Loss_G.data[0])
     optimizers['G'].step()
 
-    if epoch % 200 == 0:
+    if epoch % 100 == 0:
         if use_cuda:
             dd = utils.make_grid(fake_data.cpu().data[:64])
         else:
