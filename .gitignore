@@ -1,5 +1,5 @@
 ./data
 ./data/*
-!./data/__init__.py
+./data/__init__.py
 ./results/*
 *.png
