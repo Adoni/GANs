@@ -3,3 +3,4 @@ data/*
 data/__init__.py
 results/*
 *.png
+.ipynb_checkpoints
