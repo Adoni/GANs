@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[19]:
+# In[1]:
 
 
 import torch
@@ -18,35 +18,57 @@ from torchvision import utils
 from models import DCGAN_D,DCGAN_G
 
 
-# In[20]:
+# In[3]:
 
 
 z_size=128
 hidden_size=64
-img_size=32
 batch_size = 128
-image_chanel=1
-model_name='WGAN_DC_MNIST'
+dataset_name="LSUN"
 
 
-# In[21]:
+# In[5]:
 
 
-root = './data/mnist/'
-download = True
-trans = transforms.Compose([
-    transforms.Scale(img_size),
-    transforms.ToTensor(),
-    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-])
-data_set = dset.MNIST(
-    root=root, train=True, transform=trans, download=download)
-kwargs = {}
+if dataset_name == 'MNIST':
+    total_epoch=10000
+    img_size=32
+    image_chanel = 1
+    model_name = 'WGAN_DC_MNIST'
+    root = './data/mnist/'
+    download = True
+    trans = transforms.Compose([
+        transforms.Scale(img_size),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    data_set = dset.MNIST(
+        root=root, transform=trans, download=download)
+if dataset_name == "LSUN":
+    total_epoch=100000
+    img_size=64
+    image_chanel = 3
+    model_name = 'WGAN_DC_LSUN'
+    root = './data/lsun/'
+    download = True
+    trans = transforms.Compose([
+        transforms.Scale(img_size),
+        transforms.CenterCrop(img_size),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+    ])
+    data_set = dset.LSUN(
+        db_path=root, classes=['bedroom_train'], transform=trans)
+
+
+# In[6]:
+
+
 data_loader = torch.utils.data.DataLoader(
-    dataset=data_set, batch_size=batch_size, shuffle=True)
+        dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[22]:
+# In[7]:
 
 
 one = torch.FloatTensor([1])
@@ -59,7 +81,7 @@ if torch.cuda.is_available():
 mone = one * -1
 
 
-# In[23]:
+# In[8]:
 
 
 def weights_init(m):
@@ -71,7 +93,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[ ]:
+# In[9]:
 
 
 from tqdm import tqdm
@@ -89,7 +111,7 @@ optimizers = {
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
 }
 criterion = nn.BCELoss()
-for epoch in tqdm(range(10000)):
+for epoch in tqdm(range(total_epoch)):
     for p in D.parameters():
         p.requires_grad = True
     if epoch<25 or epoch%500==0:
@@ -123,7 +145,7 @@ for epoch in tqdm(range(10000)):
     output_fake1.backward(one)
     optimizers['G'].step()
 
-    if epoch % 100 == 0:
+    if epoch % 1000 == 0:
         if torch.cuda.is_available():
             dd = utils.make_grid(fake_data.cpu().data[:64])
         else:
