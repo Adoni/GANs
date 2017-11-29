@@ -138,7 +138,11 @@ def training():
             for p in D.parameters():
                 p.data.clamp_(-0.01, 0.01)
             optimizers['D'].zero_grad()
-            data=data_iter.next()[0]
+            try:
+                data=data_iter.next()[0]
+            except:
+                data_iter=iter(data_loader)
+                data=data_iter.next()[0]
             if torch.cuda.is_available():
                 data=data.cuda()
             input_holder.resize_as_(data).copy_(data)
