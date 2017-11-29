@@ -81,24 +81,6 @@ data_loader = torch.utils.data.DataLoader(
         dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[14]:
-
-
-get_ipython().run_cell_magic('time', '', 'for i in range(400):\n    d=next(iter(data_loader))')
-
-
-# In[15]:
-
-
-d_iter=iter(data_loader)
-
-
-# In[16]:
-
-
-get_ipython().run_cell_magic('time', '', 'for d in range(400):\n    d=d_iter.next()')
-
-
 # In[7]:
 
 
@@ -141,6 +123,7 @@ optimizers = {
     'D': torch.optim.RMSprop(D.parameters(), lr=D_lr),
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
 }
+data_iter=iter(data_loader)
 
 @profile
 def training():
@@ -155,7 +138,7 @@ def training():
             for p in D.parameters():
                 p.data.clamp_(-0.01, 0.01)
             optimizers['D'].zero_grad()
-            data=next(iter(data_loader))[0]
+            data=data_iter.next()[0]
             if torch.cuda.is_available():
                 data=data.cuda()
             input_holder.resize_as_(data).copy_(data)
@@ -185,6 +168,5 @@ def training():
                 dd = utils.make_grid(fake_data.data[:64])
             dd = dd.mul(0.5).add(0.5)
             vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
-
 training()
 
