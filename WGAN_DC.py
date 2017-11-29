@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[2]:
 
 
 import torch
@@ -18,16 +18,16 @@ from torchvision import utils
 from models import DCGAN_D,DCGAN_G
 
 
-# In[3]:
+# In[1]:
 
 
-z_size=128
+z_size=100
 hidden_size=64
-batch_size = 128
+batch_size = 64
 dataset_name="LSUN"
 
 
-# In[5]:
+# In[10]:
 
 
 if dataset_name == 'MNIST':
@@ -50,7 +50,6 @@ if dataset_name == "LSUN":
     image_chanel = 3
     model_name = 'WGAN_DC_LSUN'
     root = './data/lsun/'
-    download = True
     trans = transforms.Compose([
         transforms.Scale(img_size),
         transforms.CenterCrop(img_size),
@@ -59,13 +58,45 @@ if dataset_name == "LSUN":
     ])
     data_set = dset.LSUN(
         db_path=root, classes=['bedroom_train'], transform=trans)
+if dataset_name == 'CIFAR':
+    total_epoch=10000
+    img_size=32
+    image_chanel = 1
+    model_name = 'WGAN_DC_CIFAR'
+    root = './data/cifar10/'
+    download = True
+    trans = transforms.Compose([
+        transforms.Scale(img_size),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    data_set = dset.MNIST(
+        root=root, transform=trans, download=download)
 
 
-# In[6]:
+# In[11]:
 
 
 data_loader = torch.utils.data.DataLoader(
         dataset=data_set, batch_size=batch_size, shuffle=True)
+
+
+# In[14]:
+
+
+get_ipython().run_cell_magic('time', '', 'for i in range(400):\n    d=next(iter(data_loader))')
+
+
+# In[15]:
+
+
+d_iter=iter(data_loader)
+
+
+# In[16]:
+
+
+get_ipython().run_cell_magic('time', '', 'for d in range(400):\n    d=d_iter.next()')
 
 
 # In[7]:
@@ -110,46 +141,50 @@ optimizers = {
     'D': torch.optim.RMSprop(D.parameters(), lr=D_lr),
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
 }
-criterion = nn.BCELoss()
-for epoch in tqdm(range(total_epoch)):
-    for p in D.parameters():
-        p.requires_grad = True
-    if epoch<25 or epoch%500==0:
-        iter_D=100
-    else:
-        iter_D=25
-    for _ in range(iter_D):
+
+@profile
+def training():
+    for epoch in tqdm(range(total_epoch)):
         for p in D.parameters():
-            p.data.clamp_(-0.01, 0.01)
-        optimizers['D'].zero_grad()
-        data=next(iter(data_loader))[0]
-        if torch.cuda.is_available():
-            data=data.cuda()
-        input_holder.resize_as_(data).copy_(data)
-        output_real = D(Variable(data))
-        output_real.backward(one)
-        noise_holder.resize_(data.size()[0], z_size, 1, 1).normal_(0, 1)
-        noisev = Variable(noise_holder,volatile=True)
-        fake_data = Variable(G(noisev).data)
-        output_fake = D(fake_data)
-        output_fake.backward(mone)
-        optimizers['D'].step()
-
-    for p in D.parameters():
-        p.requires_grad = False
-    optimizers['G'].zero_grad()
-    noise_holder.resize_(data.size()[0], z_size, 1, 1).normal_(0, 1)
-    noisev = Variable(noise_holder)
-    fake_data = G(noisev)
-    output_fake1 = D(fake_data)
-    output_fake1.backward(one)
-    optimizers['G'].step()
-
-    if epoch % 1000 == 0:
-        if torch.cuda.is_available():
-            dd = utils.make_grid(fake_data.cpu().data[:64])
+            p.requires_grad = True
+        if epoch<25 or epoch%500==0:
+            iter_D=100
         else:
-            dd = utils.make_grid(fake_data.data[:64])
-        dd = dd.mul(0.5).add(0.5)
-        vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
+            iter_D=25
+        for _ in range(iter_D):
+            for p in D.parameters():
+                p.data.clamp_(-0.01, 0.01)
+            optimizers['D'].zero_grad()
+            data=next(iter(data_loader))[0]
+            if torch.cuda.is_available():
+                data=data.cuda()
+            input_holder.resize_as_(data).copy_(data)
+            output_real = D(Variable(data))
+            output_real.backward(one)
+            noise_holder.resize_(data.size()[0], z_size, 1, 1).normal_(0, 1)
+            noisev = Variable(noise_holder,volatile=True)
+            fake_data = Variable(G(noisev).data)
+            output_fake = D(fake_data)
+            output_fake.backward(mone)
+            optimizers['D'].step()
+
+        for p in D.parameters():
+            p.requires_grad = False
+        optimizers['G'].zero_grad()
+        noise_holder.resize_(data.size()[0], z_size, 1, 1).normal_(0, 1)
+        noisev = Variable(noise_holder)
+        fake_data = G(noisev)
+        output_fake1 = D(fake_data)
+        output_fake1.backward(one)
+        optimizers['G'].step()
+
+        if epoch % 1000 == 0:
+            if torch.cuda.is_available():
+                dd = utils.make_grid(fake_data.cpu().data[:64])
+            else:
+                dd = utils.make_grid(fake_data.data[:64])
+            dd = dd.mul(0.5).add(0.5)
+            vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
+
+training()
 
