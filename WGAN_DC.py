@@ -106,7 +106,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[9]:
+# In[17]:
 
 
 from tqdm import tqdm
@@ -115,6 +115,7 @@ G.apply(weights_init)
 D = DCGAN_D(isize=img_size, nz=z_size, nc=image_chanel, ndf=hidden_size, ngpu=0)
 D.apply(weights_init)
 print(G)
+print(D)
 if torch.cuda.is_available():
     G.cuda()
     D.cuda()
@@ -133,7 +134,7 @@ def training():
         if epoch<25 or epoch%500==0:
             iter_D=100
         else:
-            iter_D=25
+            iter_D=5
         for _ in range(iter_D):
             for p in D.parameters():
                 p.data.clamp_(-0.01, 0.01)
