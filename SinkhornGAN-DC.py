@@ -40,7 +40,7 @@ if dataset_name == 'MNIST':
     total_epoch=10000
     img_size=32
     image_chanel = 1
-    model_name = 'WGAN_DC_MNIST'
+    model_name = 'Sinkhorn_DC_MNIST'
     root = './data/mnist/'
     download = True
     trans = transforms.Compose([
@@ -54,7 +54,7 @@ if dataset_name == "LSUN":
     total_epoch=100000
     img_size=64
     image_chanel = 3
-    model_name = 'WGAN_DC_LSUN'
+    model_name = 'Sinkhorn_DC_LSUN'
     root = './data/lsun/'
     trans = transforms.Compose([
         transforms.Scale(img_size),
@@ -68,7 +68,7 @@ if dataset_name == 'CIFAR':
     total_epoch=10000
     img_size=32
     image_chanel = 1
-    model_name = 'WGAN_DC_CIFAR'
+    model_name = 'Sinkhorn_DC_CIFAR'
     root = './data/cifar10/'
     download = True
     trans = transforms.Compose([
