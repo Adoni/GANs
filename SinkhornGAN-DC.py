@@ -27,7 +27,6 @@ hidden_size=64
 batch_size = 64
 dataset_name="MNIST"
 output_dimension=100
-epsilon=0.1
 niter=100
 use_cuda=torch.cuda.is_available()
 print('Use cuda: %r'%use_cuda)
@@ -40,6 +39,7 @@ if dataset_name == 'MNIST':
     total_epoch=10000
     img_size=32
     image_chanel = 1
+    epsilon=0.1
     model_name = 'Sinkhorn_DC_MNIST'
     root = './data/mnist/'
     download = True
@@ -54,6 +54,7 @@ if dataset_name == "LSUN":
     total_epoch=100000
     img_size=64
     image_chanel = 3
+    epsilon=10
     model_name = 'Sinkhorn_DC_LSUN'
     root = './data/lsun/'
     trans = transforms.Compose([
@@ -112,7 +113,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[23]:
+# In[25]:
 
 
 from tqdm import tqdm
@@ -172,7 +173,7 @@ def training():
         except:
             data_iter=iter(data_loader)
             data=data_iter.next()[0]
-        if use_cuda():
+        if use_cuda:
             data=data.cuda()
         input_holder.resize_as_(data).copy_(data)
         Y = D(Variable(data))
@@ -188,7 +189,7 @@ def training():
         optimizers['G'].step()
 
         if epoch % 1000 == 0:
-            if use_cuda():
+            if use_cuda:
                 dd = utils.make_grid(fake_data.cpu().data[:64])
             else:
                 dd = utils.make_grid(fake_data.data[:64])
