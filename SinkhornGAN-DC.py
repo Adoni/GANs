@@ -17,6 +17,7 @@ from utils.show_image import imshow
 from torchvision import utils
 from models import Sinkhorn_DCGAN_D,DCGAN_G
 from utils.sinkhorn_loss import sinkhorn_loss
+import sys
 
 
 # In[14]:
@@ -25,7 +26,7 @@ from utils.sinkhorn_loss import sinkhorn_loss
 z_size=100
 hidden_size=64
 batch_size = 64
-dataset_name="MNIST"
+dataset_name="LSUN"
 output_dimension=100
 niter=100
 use_cuda=torch.cuda.is_available()
@@ -123,6 +124,9 @@ D = Sinkhorn_DCGAN_D(isize=img_size, nz=z_size, nc=image_chanel, ndf=hidden_size
 D.apply(weights_init)
 print(G)
 print(D)
+if len(sys.argv)==3:
+    G.load_state_dict(torch.load(sys.argv[1]))
+    D.load_state_dict(torch.load(sys.argv[2]))
 if use_cuda:
     G.cuda()
     D.cuda()
@@ -195,5 +199,8 @@ def training():
                 dd = utils.make_grid(fake_data.data[:64])
             dd = dd.mul(0.5).add(0.5)
             vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
+            torch.save(G.state_dict(), './results/G_epoch_%d.pth'%epoch)
+            torch.save(D.state_dict(), './results/D_epoch_%d.pth'%epoch)
+
 training()
 
