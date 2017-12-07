@@ -18,9 +18,10 @@ from torchvision import utils
 from models import Sinkhorn_DCGAN_D,DCGAN_G
 from utils.sinkhorn_loss import sinkhorn_loss
 import sys
+import pickle
 
 
-# In[14]:
+# In[2]:
 
 
 z_size=100
@@ -33,7 +34,7 @@ use_cuda=torch.cuda.is_available()
 print('Use cuda: %r'%use_cuda)
 
 
-# In[15]:
+# In[3]:
 
 
 if dataset_name == 'MNIST':
@@ -82,27 +83,30 @@ if dataset_name == 'CIFAR':
         root=root, transform=trans, download=download)
 
 
-# In[16]:
+# In[4]:
 
 
 data_loader = torch.utils.data.DataLoader(
         dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[19]:
+# In[5]:
 
 
 one = torch.FloatTensor([1])
 noise_holder=torch.FloatTensor(batch_size, z_size, 1, 1)
 input_holder = torch.FloatTensor(batch_size, 1, img_size, img_size)
+mone = one * -1
+fixed_noise = torch.FloatTensor(batch_size, z_size, 1, 1).normal_(0, 1)
 if use_cuda:
     one=one.cuda()
     noise_holder=noise_holder.cuda()
     input_holder=input_holder.cuda()
-mone = one * -1
+    fixed_noise=fixed_noise.cuda()
+    mone=mone.cuda()
 
 
-# In[20]:
+# In[6]:
 
 
 def weights_init(m):
@@ -114,7 +118,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[25]:
+# In[16]:
 
 
 from tqdm import tqdm
@@ -124,9 +128,9 @@ D = Sinkhorn_DCGAN_D(isize=img_size, nz=z_size, nc=image_chanel, ndf=hidden_size
 D.apply(weights_init)
 print(G)
 print(D)
-if len(sys.argv)==3:
-    G.load_state_dict(torch.load(sys.argv[1]))
-    D.load_state_dict(torch.load(sys.argv[2]))
+# if len(sys.argv)==3:
+#     G.load_state_dict(torch.load(sys.argv[1]))
+#     D.load_state_dict(torch.load(sys.argv[2]))
 if use_cuda:
     G.cuda()
     D.cuda()
@@ -136,7 +140,8 @@ optimizers = {
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
 }
 data_iter=iter(data_loader)
-
+errs_real=[]
+errs_fake=[]
 def training():
     for epoch in tqdm(range(total_epoch)):
         for p in D.parameters():
@@ -145,6 +150,7 @@ def training():
             iter_D=100
         else:
             iter_D=5
+        tmp_err_real=[]
         for _ in range(iter_D):
             for p in D.parameters():
                 p.data.clamp_(-0.01, 0.01)
@@ -166,9 +172,15 @@ def training():
             XX=sinkhorn_loss(X,X,epsilon,data.size()[0],niter,use_cuda)
             YY=sinkhorn_loss(Y,Y,epsilon,data.size()[0],niter,use_cuda)
             loss_real=2*XY-XX-YY
+            if use_cuda:
+                tmp_err_real.append(loss_real.cpu().data.numpy()[0])
+            else:
+                tmp_err_real.append(loss_real.data.numpy()[0])
             loss_real.backward(mone)
             optimizers['D'].step()
-
+        
+        errs_real.append(tmp_err_real)
+#         print(errs_real)
         for p in D.parameters():
             p.requires_grad = False
         optimizers['G'].zero_grad()
@@ -189,10 +201,16 @@ def training():
         XX=sinkhorn_loss(X,X,epsilon,data.size()[0],niter,use_cuda)
         YY=sinkhorn_loss(Y,Y,epsilon,data.size()[0],niter,use_cuda)
         loss_fake=2*XY-XX-YY
+        if use_cuda:
+            errs_fake.append(loss_fake.cpu().data.numpy()[0])
+        else:
+            errs_fake.append(loss_fake.data.numpy()[0])
         loss_fake.backward(one)
         optimizers['G'].step()
 
         if epoch % 1000 == 0:
+            noisev = Variable(fixed_noise,volatile=True)
+            fake_data = G(noisev)
             if use_cuda:
                 dd = utils.make_grid(fake_data.cpu().data[:64])
             else:
@@ -201,6 +219,7 @@ def training():
             vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
             torch.save(G.state_dict(), './results/G_epoch_%d.pth'%epoch)
             torch.save(D.state_dict(), './results/D_epoch_%d.pth'%epoch)
+            pickle.dump([errs_fake,errs_real], open('./results/%s_loss.pkl'%(model_name),'wb'))
 
 training()
 
