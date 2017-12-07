@@ -216,10 +216,10 @@ def training():
             else:
                 dd = utils.make_grid(fake_data.data[:64])
             dd = dd.mul(0.5).add(0.5)
-            vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
-            torch.save(G.state_dict(), './results/G_epoch_%d.pth'%epoch)
-            torch.save(D.state_dict(), './results/D_epoch_%d.pth'%epoch)
-            pickle.dump([errs_fake,errs_real], open('./results/%s_loss.pkl'%(model_name),'wb'))
+            vutils.save_image(dd, './results/%s_%0.2f_%d.png'%(model_name,epsilon,epoch))
+            torch.save(G.state_dict(), './results/G_epoch_%0.2f_%d.pth'%(epsilon,epoch))
+            torch.save(D.state_dict(), './results/D_epoch_%0.2f_%d.pth'%(epsilon,epoch))
+            pickle.dump([errs_fake,errs_real], open('./results/%s_%0.2f_loss.pkl'%(model_name,epsilon),'wb'))
 
 training()
 
