@@ -9,7 +9,7 @@ def sinkhorn_loss(x, y, epsilon, n, niter, use_cuda):
 	niter is the max. number of steps in sinkhorn loop
 	"""
     # The Sinkhorn algorithm takes as input three variables :
-    C = cost_matrix(x, y)  # Wasserstein cost function
+    C = cost_matrix(x, y) / n  # Wasserstein cost function
 
     # both marginals are fixed with equal weights
     if use_cuda:

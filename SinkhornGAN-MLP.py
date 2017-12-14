@@ -118,7 +118,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[ ]:
+# In[13]:
 
 
 from tqdm import tqdm
@@ -134,7 +134,7 @@ print(D)
 if use_cuda:
     G.cuda()
     D.cuda()
-G_lr = D_lr = 5e-3
+G_lr = D_lr = 5e-5
 optimizers = {
     'D': torch.optim.RMSprop(D.parameters(), lr=D_lr),
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
@@ -224,20 +224,20 @@ def training():
 training()
 
 
-# In[27]:
+# In[ ]:
 
 
 from matplotlib import pyplot as plt
 import numpy
 
 
-# In[28]:
+# In[14]:
 
 
-a,b=pickle.load(open('./results/Sinkhorn_MLP_MNIST_0.10_loss.pkl','rb'),encoding='latin1')
+a,b=pickle.load(open('./results/Sinkhorn_MLP_MNIST_1.00_loss.pkl','rb'),encoding='latin1')
 
 
-# In[29]:
+# In[15]:
 
 
 bb=[]
@@ -245,7 +245,7 @@ for i in b:
     bb.append(numpy.mean(i))
 
 
-# In[30]:
+# In[16]:
 
 
 plt.plot(a[:1000])
