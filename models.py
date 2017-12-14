@@ -16,6 +16,7 @@ class MLP_G(nn.Module):
             nn.Linear(ngf, ngf),
             nn.ReLU(True),
             nn.Linear(ngf, nc * isize * isize),
+            nn.Tanh(),
         )
         self.main = main
         self.nc = nc

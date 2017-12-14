@@ -29,7 +29,7 @@ hidden_size=256
 batch_size = 64
 dataset_name="MNIST"
 output_dimension=100
-niter=100
+niter=10
 use_cuda=torch.cuda.is_available()
 print('Use cuda: %r'%use_cuda)
 
@@ -41,7 +41,7 @@ if dataset_name == 'MNIST':
     total_epoch=10000
     img_size=32
     image_chanel = 1
-    epsilon=0.1
+    epsilon=1
     model_name = 'Sinkhorn_MLP_MNIST'
     root = './data/mnist/'
     download = True
@@ -118,7 +118,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[8]:
+# In[ ]:
 
 
 from tqdm import tqdm
@@ -134,7 +134,7 @@ print(D)
 if use_cuda:
     G.cuda()
     D.cuda()
-G_lr = D_lr = 5e-5
+G_lr = D_lr = 5e-3
 optimizers = {
     'D': torch.optim.RMSprop(D.parameters(), lr=D_lr),
     'G': torch.optim.RMSprop(G.parameters(), lr=G_lr)
@@ -144,13 +144,13 @@ errs_real=[]
 errs_fake=[]
 def training():
     for epoch in tqdm(range(total_epoch)):
-        for p in D.parameters():
-            p.requires_grad = True
-        if epoch<25 or epoch%500==0:
-            iter_D=100
-        else:
-            iter_D=5
-        tmp_err_real=[]
+#         for p in D.parameters():
+#             p.requires_grad = True
+#         if epoch<25 or epoch%500==0:
+#             iter_D=100
+#         else:
+#             iter_D=5
+#         tmp_err_real=[]
 #         for _ in range(iter_D):
 #             for p in D.parameters():
 #                 p.data.clamp_(-0.01, 0.01)
@@ -179,10 +179,10 @@ def training():
 #             loss_real.backward(mone)
 #             optimizers['D'].step()
         
-        errs_real.append(tmp_err_real)
+#         errs_real.append(tmp_err_real)
 #         print(errs_real)
-        for p in D.parameters():
-            p.requires_grad = False
+#         for p in D.parameters():
+#             p.requires_grad = False
         optimizers['G'].zero_grad()
         try:
             data=data_iter.next()[0]
@@ -208,13 +208,13 @@ def training():
         loss_fake.backward(one)
         optimizers['G'].step()
 
-        if epoch % 1000 == 0:
+        if epoch % 10 == 0:
             noisev = Variable(fixed_noise,volatile=True)
             fake_data = G(noisev)
             if use_cuda:
-                dd = utils.make_grid(fake_data.cpu().data[:64])
+                dd = fake_data.cpu().data[:64]
             else:
-                dd = utils.make_grid(fake_data.data[:64])
+                dd = fake_data.data[:64]
             dd = dd.mul(0.5).add(0.5)
             vutils.save_image(dd, './results/%s_%0.2f_%d.png'%(model_name,epsilon,epoch))
             torch.save(G.state_dict(), './results/G_epoch_%0.2f_%d.pth'%(epsilon,epoch))
@@ -224,20 +224,20 @@ def training():
 training()
 
 
-# In[2]:
+# In[27]:
 
 
 from matplotlib import pyplot as plt
 import numpy
 
 
-# In[10]:
+# In[28]:
 
 
-a,b=pickle.load(open('/Users/sunxiaofei/Downloads/Sinkhorn_DC_LSUN_10.00_loss.pkl','rb'),encoding='latin1')
+a,b=pickle.load(open('./results/Sinkhorn_MLP_MNIST_0.10_loss.pkl','rb'),encoding='latin1')
 
 
-# In[11]:
+# In[29]:
 
 
 bb=[]
@@ -245,7 +245,7 @@ for i in b:
     bb.append(numpy.mean(i))
 
 
-# In[12]:
+# In[30]:
 
 
 plt.plot(a[:1000])
