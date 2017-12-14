@@ -53,6 +53,7 @@ class MLP_D(nn.Module):
         self.nz = nz
 
     def forward(self, input):
+        return input.view(input.size()[0], -1)
         input = input.view(
             input.size(0), input.size(1) * input.size(2) * input.size(3))
         if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
@@ -264,9 +265,17 @@ class DCGAN_G_nobn(nn.Module):
             output = self.main(input)
         return output
 
+
 ###############################################################################
 class Sinkhorn_DCGAN_D(nn.Module):
-    def __init__(self, isize, nz, nc, ndf, ngpu, output_dimension, n_extra_layers=0):
+    def __init__(self,
+                 isize,
+                 nz,
+                 nc,
+                 ndf,
+                 ngpu,
+                 output_dimension,
+                 n_extra_layers=0):
         super(Sinkhorn_DCGAN_D, self).__init__()
         self.ngpu = ngpu
         assert isize % 16 == 0, "isize has to be a multiple of 16"
@@ -312,4 +321,4 @@ class Sinkhorn_DCGAN_D(nn.Module):
         else:
             output = self.main(input)
 
-        return output.view(input.size()[0],-1)
+        return output.view(input.size()[0], -1)
