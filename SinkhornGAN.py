@@ -23,7 +23,7 @@ import pickle
 import os
 
 
-# In[24]:
+# In[26]:
 
 
 z_size=2
@@ -35,10 +35,17 @@ niter=10
 use_cuda=torch.cuda.is_available()
 model_name='DC'
 model_name='MLP'
+if model_name=='DC':
+    hidden_size=64
+if model_name=='MLP':
+    hidden_size=500
 print('Use cuda: %r'%use_cuda)
+print('hidden_size: %d'%hidden_size)
+print('z_size: %d'%z_size)
+print('batch_size: %d'%batch_size)
 
 
-# In[25]:
+# In[27]:
 
 
 if dataset_name == 'MNIST':
@@ -46,7 +53,6 @@ if dataset_name == 'MNIST':
     img_size=32
     image_chanel = 1
     epsilon=1.0
-    hidden_size=256
     root = './data/mnist/'
     download = True
     trans = transforms.Compose([
