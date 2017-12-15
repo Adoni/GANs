@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[1]:
+# In[17]:
 
 
 import torch
@@ -23,29 +23,30 @@ import pickle
 import os
 
 
-# In[2]:
+# In[24]:
 
 
-z_size=100
-hidden_size=64
-batch_size = 64
+z_size=2
+hidden_size=500
+batch_size = 200
 dataset_name="MNIST"
 output_dimension=100
-niter=100
+niter=10
 use_cuda=torch.cuda.is_available()
 model_name='DC'
 model_name='MLP'
 print('Use cuda: %r'%use_cuda)
 
 
-# In[3]:
+# In[25]:
 
 
 if dataset_name == 'MNIST':
     total_epoch=50000
     img_size=32
     image_chanel = 1
-    epsilon=0.1
+    epsilon=1.0
+    hidden_size=256
     root = './data/mnist/'
     download = True
     trans = transforms.Compose([
@@ -84,14 +85,14 @@ if dataset_name == 'CIFAR':
         root=root, transform=trans, download=download)
 
 
-# In[4]:
+# In[20]:
 
 
 data_loader = torch.utils.data.DataLoader(
         dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[5]:
+# In[21]:
 
 
 one = torch.FloatTensor([1])
@@ -107,7 +108,7 @@ if use_cuda:
     mone=mone.cuda()
 
 
-# In[6]:
+# In[22]:
 
 
 def weights_init(m):
@@ -119,7 +120,7 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[10]:
+# In[16]:
 
 
 from tqdm import tqdm
