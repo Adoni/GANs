@@ -36,7 +36,7 @@ print('Use cuda: %r'%use_cuda)
 
 
 if dataset_name == 'MNIST':
-    total_epoch=10000
+    total_epoch=50000
     img_size=32
     image_chanel = 1
     root = './data/mnist/'

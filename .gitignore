@@ -4,6 +4,10 @@ data/__init__.py
 results/*
 *.png
 .ipynb_checkpoints
+<<<<<<< HEAD
 _*
 ./_cache_._data_lsun__bedroom_train_lmdb
 *cache*
+=======
+!experiment
+>>>>>>> 9a63b4e186e9b0c8df3ca80de4b6af31183708a9
