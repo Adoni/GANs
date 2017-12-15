@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[31]:
 
 
 import torch
@@ -15,26 +15,30 @@ import torchvision.utils as vutils
 import sys
 from utils.show_image import imshow
 from torchvision import utils
-from models import DCGAN_D,DCGAN_G
+from models import DCGAN_D,DCGAN_G,MLP_D,MLP_G
+import os
+import pickle
 
 
-# In[1]:
+# In[28]:
 
 
 z_size=100
 hidden_size=64
 batch_size = 64
-dataset_name="LSUN"
+dataset_name="MNIST"
+model_name = 'MLP'
+use_cuda=torch.cuda.is_available()
+print('Use cuda: %r'%use_cuda)
 
 
-# In[10]:
+# In[22]:
 
 
 if dataset_name == 'MNIST':
     total_epoch=10000
     img_size=32
     image_chanel = 1
-    model_name = 'WGAN_DC_MNIST'
     root = './data/mnist/'
     download = True
     trans = transforms.Compose([
@@ -58,43 +62,32 @@ if dataset_name == "LSUN":
     ])
     data_set = dset.LSUN(
         db_path=root, classes=['bedroom_train'], transform=trans)
-if dataset_name == 'CIFAR':
-    total_epoch=10000
-    img_size=32
-    image_chanel = 1
-    model_name = 'WGAN_DC_CIFAR'
-    root = './data/cifar10/'
-    download = True
-    trans = transforms.Compose([
-        transforms.Scale(img_size),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-    data_set = dset.MNIST(
-        root=root, transform=trans, download=download)
 
 
-# In[11]:
+# In[23]:
 
 
 data_loader = torch.utils.data.DataLoader(
         dataset=data_set, batch_size=batch_size, shuffle=True)
 
 
-# In[7]:
+# In[29]:
 
 
 one = torch.FloatTensor([1])
 noise_holder=torch.FloatTensor(batch_size, z_size, 1, 1)
 input_holder = torch.FloatTensor(batch_size, 1, img_size, img_size)
-if torch.cuda.is_available():
+mone = one * -1
+fixed_noise = torch.FloatTensor(batch_size, z_size, 1, 1).normal_(0, 1)
+if use_cuda:
     one=one.cuda()
     noise_holder=noise_holder.cuda()
     input_holder=input_holder.cuda()
-mone = one * -1
+    fixed_noise=fixed_noise.cuda()
+    mone=mone.cuda()
 
 
-# In[8]:
+# In[25]:
 
 
 def weights_init(m):
@@ -106,14 +99,18 @@ def weights_init(m):
         m.bias.data.fill_(0)
 
 
-# In[17]:
+# In[33]:
 
 
 from tqdm import tqdm
-G = DCGAN_G(isize=img_size, nz=z_size, nc=image_chanel, ngf=hidden_size, ngpu=0)
-G.apply(weights_init)
-D = DCGAN_D(isize=img_size, nz=z_size, nc=image_chanel, ndf=hidden_size, ngpu=0)
-D.apply(weights_init)
+if model_name=='DC':
+    G = DCGAN_G(isize=img_size, nz=z_size, nc=image_chanel, ngf=hidden_size, ngpu=0)
+    G.apply(weights_init)
+    D = DCGAN_D(isize=img_size, nz=z_size, nc=image_chanel, ndf=hidden_size, ngpu=0)
+    D.apply(weights_init)
+if model_name=='MLP':
+    G = MLP_G(isize=img_size, nz=z_size, nc=image_chanel, ngf=hidden_size, ngpu=0)
+    D = MLP_D(isize=img_size, nz=z_size, nc=image_chanel, ndf=hidden_size, ngpu=0)
 print(G)
 print(D)
 if torch.cuda.is_available():
@@ -126,7 +123,9 @@ optimizers = {
 }
 data_iter=iter(data_loader)
 
-@profile
+directory='./results/WGAN_%s/%s'%(model_name,dataset_name)
+if not os.path.exists(directory):
+    os.makedirs(directory)
 def training():
     for epoch in tqdm(range(total_epoch)):
         for p in D.parameters():
@@ -167,11 +166,13 @@ def training():
         optimizers['G'].step()
 
         if epoch % 1000 == 0:
-            if torch.cuda.is_available():
+            noisev = Variable(fixed_noise,volatile=True)
+            fake_data = G(noisev)
+            if use_cuda:
                 dd = utils.make_grid(fake_data.cpu().data[:64])
             else:
                 dd = utils.make_grid(fake_data.data[:64])
             dd = dd.mul(0.5).add(0.5)
-            vutils.save_image(dd, './results/%s_%d.png'%(model_name,epoch))
+            vutils.save_image(dd, '%s/%d.png'%(directory,epoch))
 training()
 

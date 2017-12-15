@@ -54,7 +54,6 @@ class MLP_D(nn.Module):
         self.nz = nz
 
     def forward(self, input):
-        return input.view(input.size()[0], -1)
         input = input.view(
             input.size(0), input.size(1) * input.size(2) * input.size(3))
         if isinstance(input.data, torch.cuda.FloatTensor) and self.ngpu > 1:
@@ -103,7 +102,7 @@ class DCGAN_D(nn.Module):
 
         # state size. K x 4 x 4
         main.add_module('final.{0}-{1}.conv'.format(cndf, 1),
-                        nn.Conv2d(cndf, output_dimension, 4, 1, 0, bias=False))
+                        nn.Conv2d(cndf, 1, 4, 1, 0, bias=False))
         self.main = main
 
     def forward(self, input):
@@ -323,3 +322,18 @@ class Sinkhorn_DCGAN_D(nn.Module):
             output = self.main(input)
 
         return output.view(input.size()[0], -1)
+
+
+class Sinkhorn_MLP_D(nn.Module):
+    def __init__(self, isize, nz, nc, ndf, ngpu):
+        super(Sinkhorn_MLP_D, self).__init__()
+        self.ngpu = ngpu
+
+        main = nn.Sequential(nn.Linear(nc * isize * isize, ndf))
+        self.main = main
+        self.nc = nc
+        self.isize = isize
+        self.nz = nz
+
+    def forward(self, input):
+        return input.view(input.size()[0], -1)
