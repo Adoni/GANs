@@ -5,3 +5,6 @@ results/*
 *.png
 .ipynb_checkpoints
 !experiment
+_*
+./_cache_._data_lsun__bedroom_train_lmdb
+*cache*
