@@ -4,3 +4,6 @@ data/__init__.py
 results/*
 *.png
 .ipynb_checkpoints
+_*
+./_cache_._data_lsun__bedroom_train_lmdb
+*cache*
