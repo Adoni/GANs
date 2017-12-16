@@ -26,15 +26,15 @@ import os
 # In[26]:
 
 
-z_size=2
+z_size=100
 hidden_size=500
 batch_size = 200
 dataset_name="MNIST"
 output_dimension=100
 niter=10
 use_cuda=torch.cuda.is_available()
-model_name='DC'
 model_name='MLP'
+model_name='DC'
 if model_name=='DC':
     hidden_size=64
 if model_name=='MLP':
@@ -66,7 +66,7 @@ if dataset_name == "LSUN":
     total_epoch=100000
     img_size=64
     image_chanel = 3
-    epsilon=10
+    epsilon=1
     root = './data/lsun/'
     trans = transforms.Compose([
         transforms.Scale(img_size),
