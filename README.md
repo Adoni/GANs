@@ -16,3 +16,4 @@ Right now we take experiments on MNIST and LSUN. The best results of SinkhornGAN
 * [Sinkhorn-Python](https://github.com/rflamary/POT/blob/master/ot/bregman.py)
 * [A repo containing many GAN models](https://github.com/tjwei/GANotebooks)
 * [SinkhornAutoDiff](https://github.com/gpeyre/SinkhornAutoDiff)
+
